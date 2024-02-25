@@ -1,0 +1,451 @@
+package DaPackage;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JToolBar;
+import javax.swing.JTabbedPane;
+import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.SwingConstants;
+import java.awt.Font;
+
+public class Mitanimation extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private static JPanel contentPane;
+
+	static boolean PaintBrush = false;
+	static int PixelSize=5;
+	static JLabel FrameCounter;
+
+
+	
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Mitanimation frame = new Mitanimation();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Mitanimation() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 980, 800);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		JMenu FileMenu = new JMenu("File");
+		menuBar.add(FileMenu);
+		
+		JMenuItem SaveProjectButton = new JMenuItem("Save project");
+		FileMenu.add(SaveProjectButton);
+		SaveProjectButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					FileOutputStream fos= new FileOutputStream("save.dat");
+					BufferedOutputStream bos=new BufferedOutputStream(fos);
+					ObjectOutputStream oos=new ObjectOutputStream(bos);
+					DataStorage save=new DataStorage();
+					oos.writeObject(save);
+					oos.close();
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+			
+		});
+		
+		JMenuItem LoadProjectButton = new JMenuItem("Load Project");
+		FileMenu.add(LoadProjectButton);
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+	LoadProjectButton.addActionListener(new ActionListener(){
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				FileInputStream fis = new FileInputStream("save.dat");
+				BufferedInputStream bis=new BufferedInputStream(fis);
+				ObjectInputStream ois=new ObjectInputStream(bis);
+				DataStorage load= (DataStorage) ois.readObject();
+				Frame.AllFrames=load.ProjectFrames;
+				System.out.println("Loaded"+Frame.AllFrames.size());
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+		}
+		
+	});
+		
+		 FrameCounter = new JLabel("| 0 |");
+		FrameCounter.setHorizontalAlignment(SwingConstants.CENTER);
+		FrameCounter.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		FrameCounter.setBounds(295, 675, 100, 23);
+		contentPane.add(FrameCounter);
+		
+		JButton PreviousButton = new JButton("Previous Frame");
+		PreviousButton.setBounds(165, 675, 130, 23);
+		contentPane.add(PreviousButton);
+		PreviousButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Frame.LoadPreviousFrame();
+				FrameCounter.setText("| "+Frame.CurrentFrame+" |");				
+				
+			}
+			
+		});
+
+		
+		
+		JButton NextButton = new JButton("Next Frame");
+		NextButton.setBounds(395, 675, 130, 23);
+		contentPane.add(NextButton);
+		NextButton.setOpaque(true);
+		
+		NextButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Frame.LoadNextFrame();
+				FrameCounter.setText("| "+Frame.CurrentFrame+" |");
+				
+			}
+			
+		});
+		JButton LoadPreviousButton = new JButton("Load Previous");
+		LoadPreviousButton.setBounds(285, 705, 120, 23);
+		contentPane.add(LoadPreviousButton);
+		LoadPreviousButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Frame.RepaintPrevious();
+			
+			}});
+		
+		JButton StartButton = new JButton("Start");
+		StartButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		StartButton.setBounds(690, 480, 100, 35);
+		contentPane.add(StartButton);
+		StartButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Frame.PlayAnimation();
+				
+			}
+			
+		});
+		
+		JButton PauseButton = new JButton("Pause");
+		PauseButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		PauseButton.setBounds(830, 480, 100, 35);
+		contentPane.add(PauseButton);
+		PauseButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Frame.PNU();
+				
+			}
+			
+		});
+		JButton StopButton = new JButton("Stop");
+		StopButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		StopButton.setBounds(760, 530, 100, 35);
+		contentPane.add(StopButton);
+		StopButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Frame.StopAnimation();
+				
+			}
+			
+		});
+		
+
+		LoadPaintPane();
+
+		LoadColors();
+
+
+	}
+	
+	static void LoadColors() {
+		JButton Black=new JButton();
+		Black.setBackground(Color.black);
+		Black.setBounds(700,100,40,40);
+		Black.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=Color.black;
+				
+			}});
+		contentPane.add(Black);
+		
+		JButton White=new JButton();
+		White.setBackground(Color.white);
+		White.setBounds(760,100,40,40);
+		White.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=Color.white;
+				
+			}});
+		contentPane.add(White);
+		
+		JButton Gray=new JButton();
+		Gray.setBackground(Color.gray);
+		Gray.setBounds(820,100,40,40);
+		Gray.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=Color.gray;
+				
+			}});
+		contentPane.add(Gray);
+		
+		JButton Purple=new JButton();
+		Purple.setBackground(new Color(120,16,210));
+		Purple.setBounds(880,100,40,40);
+		Purple.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=new Color(160,32,240);
+				
+			}});
+		contentPane.add(Purple);
+		
+		JButton Red=new JButton();
+		Red.setBackground(Color.red);
+		Red.setBounds(700,150,40,40);
+		Red.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=Color.red;
+				
+			}});
+		contentPane.add(Red);
+		
+		JButton Green=new JButton();
+		Green.setBackground(Color.green);
+		Green.setBounds(760,150,40,40);
+		Green.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=Color.green;
+				
+			}});
+		contentPane.add(Green);
+	
+		JButton Blue=new JButton();
+		Blue.setBackground(Color.blue);
+		Blue.setBounds(820,150,40,40);
+		Blue.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=Color.blue;
+				
+			}});
+		contentPane.add(Blue);
+		
+		JButton Pick=new JButton();
+		Pick.setBackground(new Color(red,green,blue));
+		Pick.setBounds(880,150,40,40);
+		Pick.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SpecLabel.UseColor=Pick.getBackground();
+				
+			}});
+		contentPane.add(Pick);
+		
+
+
+		JSlider RedSlider=new JSlider();
+		RedSlider.setValue(123);
+		RedSlider.setMaximum(255);
+		RedSlider.setBounds(695,230,235,20);
+		RedSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				red=RedSlider.getValue();
+				Pick.setBackground(new Color(red,green,blue));
+				SpecLabel.UseColor=new Color(red,green,blue);
+			}
+			
+		});
+		contentPane.add(RedSlider);
+		
+		JLabel RedLbl = new JLabel("Red:");
+		RedLbl.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		RedLbl.setHorizontalAlignment(SwingConstants.TRAILING);
+		RedLbl.setBounds(650, 230, 46, 20);
+		contentPane.add(RedLbl);
+		
+		JSlider GreenSlider=new JSlider();
+		GreenSlider.setValue(123);
+		GreenSlider.setMaximum(255);
+		GreenSlider.setBounds(695,265,235,20);
+		GreenSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				green=GreenSlider.getValue();
+				Pick.setBackground(new Color(red,green,blue));
+				SpecLabel.UseColor=new Color(red,green,blue);
+			}
+			
+		});
+		contentPane.add(GreenSlider);
+		
+		JLabel GreenLbl = new JLabel("Green:");
+		GreenLbl.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		GreenLbl.setHorizontalAlignment(SwingConstants.TRAILING);
+		GreenLbl.setBounds(650, 265, 46, 20);
+		contentPane.add(GreenLbl);
+		
+		JSlider BlueSlider=new JSlider();
+		BlueSlider.setValue(123);
+		BlueSlider.setMaximum(255);
+		BlueSlider.setBounds(695,300,235,20);
+		BlueSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				blue=BlueSlider.getValue();
+				Pick.setBackground(new Color(red,green,blue));
+				SpecLabel.UseColor=new Color(red,green,blue);
+			}
+			
+		});
+		contentPane.add(BlueSlider);
+		
+		JLabel BlueLbl = new JLabel("Blue:");
+		BlueLbl.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		BlueLbl.setHorizontalAlignment(SwingConstants.TRAILING);
+		BlueLbl.setBounds(650, 300, 46, 20);
+		contentPane.add(BlueLbl);
+		
+
+		
+		JLabel BrushLbl = new JLabel("Brush Size: 2");
+		BrushLbl.setHorizontalAlignment(SwingConstants.CENTER);
+		BrushLbl.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		BrushLbl.setBounds(700, 381, 230, 20);
+		contentPane.add(BrushLbl);
+		
+		JSlider BrushSlider = new JSlider();
+		BrushSlider.setValue(2);
+		BrushSlider.setMinimum(1);
+		BrushSlider.setMaximum(10);
+		BrushSlider.setBounds(695, 350, 235, 20);
+		BrushSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				SpecLabel.BrushSize=BrushSlider.getValue();
+				BrushLbl.setText("Brush Size: "+BrushSlider.getValue());
+				
+			}
+			
+		});
+		contentPane.add(BrushSlider);
+		
+
+
+		
+
+	}
+	static int red=123;
+	static int green=123;
+	static int blue=123;
+
+
+	static void LoadPaintPane() {
+		int MoveX=20;
+		int MoveY=20;
+		for(int i=0;i<SpecLabel.PaintPane.length;i++) {
+			MoveY+=PixelSize;
+			MoveX=20;
+			for(int j=0;j<SpecLabel.PaintPane[0].length;j++) {
+
+
+				SpecLabel.PaintPane[j][i] =new SpecLabel(j,i);
+				SpecLabel.PaintPane[j][i].setColor(Color.white);
+				SpecLabel.PaintPane[j][i].setBounds(MoveX, MoveY, PixelSize, PixelSize);
+				contentPane.add(SpecLabel.PaintPane[j][i]);
+				MoveX+=PixelSize;
+				
+			}
+		}
+	}
+}

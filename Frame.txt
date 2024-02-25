@@ -1,0 +1,131 @@
+package DaPackage;
+
+import java.awt.Color;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Frame implements Serializable {
+	public static int CurrentFrame=0;
+	public static int FrameRate=7;
+	
+	Color[][] FrameColors= new Color[128][128];
+	
+	static List<Frame> AllFrames=new ArrayList<Frame>();
+	
+	public Frame(SpecLabel[][] Canvas) {
+		for(int i=0;i<Canvas.length;i++) {
+			for(int j=0; j<Canvas.length;j++) {
+				FrameColors[j][i]=Canvas[j][i].getBackground();
+			}
+		}
+		AllFrames.add(this);
+	}
+	
+	public static void LoadNextFrame() {
+		if(CurrentFrame+1>=AllFrames.size()) {
+
+			
+			Frame k=new Frame(SpecLabel.PaintPane);
+
+		}else {
+			
+			for(int i=0;i<128;i++) {
+				for(int j=0; j<128;j++) {
+					if(!SpecLabel.PaintPane[j][i].getColor().equals(AllFrames.get(CurrentFrame).FrameColors[j][i]))
+					AllFrames.get(CurrentFrame).FrameColors[j][i]=SpecLabel.PaintPane[j][i].getColor();
+					if(!SpecLabel.PaintPane[j][i].getColor().equals(AllFrames.get(CurrentFrame+1).FrameColors[j][i]))
+					SpecLabel.PaintPane[j][i].setColor(AllFrames.get(CurrentFrame+1).FrameColors[j][i]);
+				}
+			}
+		}
+		System.out.println("Size:"+AllFrames.size());
+		CurrentFrame++;
+		System.out.println(CurrentFrame);
+	}
+	public static void LoadPreviousFrame() {
+		if(CurrentFrame>=1) {
+			boolean last=false;
+			
+			if(CurrentFrame==AllFrames.size()) {
+				Frame k=new Frame(SpecLabel.PaintPane);
+
+				System.out.println("true");
+				last=true;
+				
+			}
+			CurrentFrame--;
+			for(int i=0;i<128;i++) {
+				for(int j=0; j<128;j++) {
+
+					AllFrames.get(CurrentFrame+1).FrameColors[j][i]=SpecLabel.PaintPane[j][i].getColor();
+					if(!SpecLabel.PaintPane[j][i].getColor().equals(AllFrames.get(CurrentFrame).FrameColors[j][i]))
+					SpecLabel.PaintPane[j][i].setColor(AllFrames.get(CurrentFrame).FrameColors[j][i]);
+				}
+			}
+			
+			System.out.println("Size:"+AllFrames.size());
+			System.out.println(CurrentFrame);
+			last=false;
+		}
+		
+	}
+
+	static Thread AnimationInPlay=new Thread();
+	public static void PlayAnimation() {
+		if(CurrentFrame!=0&&CurrentFrame==AllFrames.size()) {
+		Frame k=new Frame(SpecLabel.PaintPane);
+		}
+		if(!AnimationInPlay.isAlive()) {
+			AnimationInPlay=new Thread(()->{
+				for(int t=0;t<AllFrames.size();t++) {
+					Mitanimation.FrameCounter.setText("| "+t+" |");
+					CurrentFrame=t;
+					try {
+						Thread.sleep(1000/FrameRate);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					Frame InPlay=AllFrames.get(t);
+					
+					for(int y=0;y<128;y++) {
+						for(int x=0;x<128;x++) {
+							if(!InPlay.FrameColors[x][y].equals(SpecLabel.PaintPane[x][y].getColor())) {
+							SpecLabel.PaintPane[x][y].setColor(InPlay.FrameColors[x][y]);
+							
+							}
+						}		
+					}
+				}
+			});
+			AnimationInPlay.start();
+		}
+	}
+	public static void RepaintPrevious() {
+		for(int y=0;y<128;y++) {
+			for(int x=0;x<128;x++) {
+				if(!SpecLabel.PaintPane[x][y].getColor().equals(Frame.AllFrames.get(Frame.CurrentFrame-1).FrameColors[x][y])) {
+					SpecLabel.PaintPane[x][y].setColor(Frame.AllFrames.get(Frame.CurrentFrame-1).FrameColors[x][y]);
+			}
+		}
+		
+	}
+}
+	static int chack=0;
+	public static void PNU() {
+		if(AnimationInPlay.isAlive()) {
+			if(chack%2==0)
+			AnimationInPlay.suspend();
+			else AnimationInPlay.resume();
+			chack++;
+		}
+	}
+	public static void StopAnimation() {
+		if(AnimationInPlay.isAlive()) {
+			AnimationInPlay.stop();
+		}
+	}
+
+	
+}
